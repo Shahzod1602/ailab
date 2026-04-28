@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("STUDENT") // STUDENT | ADMIN
+  studentId    String?
+  createdAt    DateTime @default(now())
+
+  requests       Request[]       @relation("StudentRequests")
+  reviewedItems  Request[]       @relation("AdminReviewed")
+}
+
+model Server {
+  id          String   @id @default(cuid())
+  name        String   @unique // PC1, PC2, PC3
+  ipAddress   String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  grants AccessGrant[]
+}
+
+model Request {
+  id              String    @id @default(cuid())
+  userId          String
+  purpose         String
+  durationDays    Int
+  status          String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  reviewerId      String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime  @default(now())
+
+  user     User         @relation("StudentRequests", fields: [userId], references: [id])
+  reviewer User?        @relation("AdminReviewed", fields: [reviewerId], references: [id])
+  grant    AccessGrant?
+}
+
+model AccessGrant {
+  id          String    @id @default(cuid())
+  requestId   String    @unique
+  serverId    String
+  sshUsername String
+  sshPassword String
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  request Request @relation(fields: [requestId], references: [id])
+  server  Server  @relation(fields: [serverId], references: [id])
+}
