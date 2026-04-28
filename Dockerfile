@@ -41,7 +41,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-RUN groupadd -r nodejs && useradd -r -g nodejs -s /bin/false nextjs
+RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs -s /bin/false nextjs
 
 # Production node_modules (with full prisma CLI + transitive deps)
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
