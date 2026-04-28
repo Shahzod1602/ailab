@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    image: ailab:latest
+    container_name: ailab
+    restart: unless-stopped
+    ports:
+      - "3003:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/app/data/prod.db
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_TRUST_HOST: "true"
+      AUTH_URL: ${AUTH_URL:-http://91.99.146.118:3003}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-AI Lab <onboarding@resend.dev>}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/auth/csrf"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
